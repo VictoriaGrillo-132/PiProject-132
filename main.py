@@ -17,6 +17,9 @@ GPIO.setup(button2, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 #This could possibly useless and be moved into the JepdyBoard class
 class ValuesandAnswers():
+    questions = [["a1","b1","c1","d1","e1"],
+                ["a2","b2","c2","d2","e2"], 
+                ["a3","b3","c3","d3","e3"]]
     def __init__(self, points):
         self.points = points
 
@@ -31,43 +34,10 @@ class ValuesandAnswers():
     def Questions(self, location):
         JepdyBoard.Que.config(state=NORMAL)
         JepdyBoard.Que.delete("1.0", END)
-        questions=[["a1","b1","c1","d1","e1"],
-                   ["a2","b2","c2","d2","e2"], 
-                   ["a3","b3","c3","d3","e3"]]
-        if location[0] == 0:
-            if location[1] == 0:
-                JepdyBoard.Que.insert(END, questions[0][0])
-            elif location[1] == 1:
-                JepdyBoard.Que.insert(END, questions[0][1])
-            elif location[1] == 2:
-                JepdyBoard.Que.insert(END, questions[0][2])
-            elif location[1] == 3:
-                JepdyBoard.Que.insert(END, questions[0][3])
-            elif location[1] == 4:
-                JepdyBoard.Que.insert(END, questions[0][4])
-        elif location[0] == 1:
-            if location[1] == 0:
-                JepdyBoard.Que.insert(END, questions[1][0])
-            elif location[1] == 1:
-                JepdyBoard.Que.insert(END, questions[1][1])
-            elif location[1] == 2:
-                JepdyBoard.Que.insert(END, questions[1][2])
-            elif location[1] == 3:
-                JepdyBoard.Que.insert(END, questions[1][3])
-            elif location[1] == 4:
-                JepdyBoard.Que.insert(END, questions[1][4])
-        else:
-            if location[1] == 0:
-                JepdyBoard.Que.insert(END, questions[2][0])
-            elif location[1] == 1:
-                JepdyBoard.Que.insert(END, questions[2][1])
-            elif location[1] == 2:
-                JepdyBoard.Que.insert(END, questions[2][2])
-            elif location[1] == 3:
-                JepdyBoard.Que.insert(END, questions[2][3])
-            elif location[1] == 4:
-                JepdyBoard.Que.insert(END, questions[2][4])
-
+        #print question to question box
+        JepdyBoard.Que.insert(END, ValuesandAnswers.questions[location[0]][location[1]])
+        JepdyBoard.Que.config(state=DISABLED)
+            
     def ChoosePerson(self):
         global led1, led2, button1, button2
         if GPIO.input(button1) == GPIO.HIGH:
@@ -80,6 +50,22 @@ class ValuesandAnswers():
             sleep(.5)
             GPIO.output(led2, GPIO.LOW)
             return 2
+
+class TypeQuestion(Frame):
+    def __init__(self, parent, question):
+        Frame.__init__(self, parent)
+
+        TypeQuestion.Que = Text(self, bg="light grey", height=2, font=Letters)
+        TypeQuestion.Que.insert("1.0", question)
+        TypeQuestion.Que.pack(anchor=N, fill=X)
+
+        TypeQuestion.back = Button(self, text="Back", command=self.Leave)
+        TypeQuestion.back.pack(anchor=SW, expand=1)
+
+    def Leave(self):
+        self.pack_forget()
+        GBoard.pack(expand=1, fill=BOTH)
+
 
 class JepdyBoard(Frame):
     def __init__(self, parent):
@@ -99,11 +85,6 @@ class JepdyBoard(Frame):
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=10)
         self.pack(expand=1, fill=BOTH)
 
-    #Create entry to enter answers
-        JepdyBoard.Answering = Entry(self,font=Letters ,width = 10)
-        JepdyBoard.Answering.grid(row=(row_index+1), column=1, sticky=N+S+E+W, ipady=10, columnspan=(col_index-1))
-        JepdyBoard.Answering.bind("<Return>", self.PressEnter)
-
         #Labels to show score, question, and maybe who's turn it is.
         JepdyBoard.Que = Text(self, bg="light grey", width=1, height=5 , state=DISABLED, font=Letters)
         JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=N+S+E+W)
@@ -111,10 +92,12 @@ class JepdyBoard(Frame):
     def BtnClick(self, location):
         #location is (row,column)
         print(f"{location[0]}x{location[1]}")
+        #Remove the jeoparady board
+        self.pack_forget()
+        QFrame = TypeQuestion(window, ValuesandAnswers.questions[location[0]][location[1]])
+        QFrame.pack(expand=1, fill=BOTH)
+        #print question in top texbox
         ValuesandAnswers.Questions(self, location)
-    
-    def PressEnter(self, Anything):
-        JepdyBoard.Answering.delete(0, END)
 
 window = Tk()
 window.title("Ready Set Study!")
