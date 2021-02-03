@@ -1,6 +1,7 @@
 from tkinter import *
 #import Rpi.GPIO as GPIO
 from random import randint
+import tkinter
 Letters=("Times New Roman", 14)
 
 '''
@@ -51,6 +52,60 @@ class ValsandAns():
             sleep(.5)
             GPIO.output(led2, GPIO.LOW)
             return 2
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        #self.points = 0
+        #self.active = 0
+
+    @property
+    def points(self):
+        return self._points
+    
+    @points.setter
+    def points(self, value):
+        self._points = value
+        PlayersFrame.updatePlayerLabels(self)
+
+    @property
+    def active(self):
+        return self._active
+    
+    @active.setter
+    def active(self, value):
+        self._active = value
+        PlayersFrame.updatePlayerLabels(self)
+
+class PlayerFrame(Frame):
+    activePlayer = 0
+    def __init__(self, parent):
+        Frame.__init__(self, parent)
+
+    def updatePlayerLabels(self, player):
+        if (player.name == Players[0].name):
+            PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}")
+        else:
+            PlayerFrame.Player2Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}")
+
+    def addPoints(self, pts):
+        Players[self.activePlayer].points += pts
+
+    def Setup(self):
+        PlayerFrame.Player1Label = Label(self, font=Letters)
+        PlayerFrame.Player2Label = Label(self, font=Letters)
+        
+        #Players[0] IS PLAYER 1       
+        Players[0].points = 0
+        Players[0].active = 1
+        Players[1].points = 0
+        Players[1].active = 0
+        
+        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10)
+        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(4, weight=1)
+        self.pack(anchor=N, expand=1, fill=X)
 
 class TypeQuestion(Frame):
     right_ans=["r","t","y","u","z"]
@@ -154,6 +209,8 @@ class TypeMulti(Frame):
     def Right(self):
         print("Right")
         self.Leave("Right")
+        PlayersFrame.addPoints(-300)
+        
     
     def Wrong(self):
         #print("Wrong")
@@ -222,9 +279,7 @@ class TypeGuess(Frame):
         GBoard.pack(expand=1, fill=BOTH)
 
 class JepdyBoard(Frame):
-    #current player
     #cp=ValsandAns.ChoosePerson()
-    
     def __init__(self, parent):
         Frame.__init__(self, parent)
 
@@ -240,11 +295,16 @@ class JepdyBoard(Frame):
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=(20, 10))
                 else:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=10)
-        self.pack(expand=1, fill=BOTH)
+        self.pack(anchor=N, expand=1, fill=BOTH)
 
         #Labels to show score, question, and maybe who's turn it is.
+        #JepdyBoard.Player1Label = Label(self, text=f"{Players[0].name}\n${Players[0].points}", font=Letters)
+        #JepdyBoard.Player2Label = Label(self, text=f"{Players[1].name}\n${Players[1].points}", font=Letters)
         JepdyBoard.Que = Text(self, bg="light grey", width=1, height=5 , state=DISABLED, font=Letters)
-        JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=N+S+E+W)
+
+        #JepdyBoard.Player1Label.grid(row=0, column=0, sticky=NSEW)
+        #JepdyBoard.Player2Label.grid(row=0, column=4, sticky=NSEW)
+        JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=NSEW)
 
     def BtnClick(self, location):
         #location is (row,column)
@@ -272,6 +332,10 @@ window.title("Ready Set Study!")
 WIDTH = 800
 HEIGHT = 400
 window.geometry("{}x{}".format(WIDTH, HEIGHT))
+#Make players frame and get their name somehow
 GBoard = JepdyBoard(window)
+Players = [Player("Player 1"), Player("Player 2")]
+PlayersFrame = PlayerFrame(window)
+PlayersFrame.Setup()
 GBoard.Setup()
 window.mainloop()
