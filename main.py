@@ -56,6 +56,7 @@ class ValsandAns():
 class Player:
     def __init__(self, name):
         self.name = name
+        self._points = 0
 
     @property
     def points(self):
@@ -75,39 +76,37 @@ class Player:
         self._active = value
         PlayersFrame.updatePlayerLabels(self)
 
-class PlayerFrame(Frame):
-    activePlayer = 0
+class PlayerFrame(Frame): 
     def __init__(self, parent):
         Frame.__init__(self, parent)
+        PlayerFrame.Player1Label = Label(self, font=Letters)
+        PlayerFrame.Player2Label = Label(self, font=Letters)
+        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10)
+        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(4, weight=1)
+        self.pack(anchor=N, expand=1, fill=X)
+        self.activePlayer = 0
 
-    def updatePlayerLabels(self, player):
-        if (player.name == Players[0].name):
-            PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Gold", "Black"][self.activePlayer])
-        else:
-            PlayerFrame.Player2Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Black", "Gold"][self.activePlayer])
+    @property
+    def activePlayer(self):
+        return self._activePlayer
+
+    @activePlayer.setter
+    def activePlayer(self, value):
+        self._activePlayer = value
+        self.updatePlayerLabels(Players[value])
+
+    def updatePlayerLabels(self, player):        
+        PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Gold2", "Black"][self.activePlayer])
+        PlayerFrame.Player2Label.configure(text=f"{Players[1].name}\n$ {Players[1].points}", foreground=["Black", "Gold2"][self.activePlayer])
 
     def addPoints(self, pts):
         Players[self.activePlayer].points += pts
     
     def Switch(self):
         #swap active players
-        pass
-
-    def Setup(self):
-        PlayerFrame.Player1Label = Label(self, font=Letters)
-        PlayerFrame.Player2Label = Label(self, font=Letters)
-        
-        #Players[0] IS PLAYER 1       
-        Players[0].points = 0
-        Players[0].active = 1
-        Players[1].points = 0
-        Players[1].active = 0
-        
-        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10)
-        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10)
-        self.grid_columnconfigure(0, weight=0)
-        self.grid_columnconfigure(4, weight=1)
-        self.pack(anchor=N, expand=1, fill=X)
+        self.activePlayer = abs(self.activePlayer-1)
 
 class TypeQuestion(Frame):
     right_ans=["r","t","y","u","z"]
@@ -209,14 +208,14 @@ class TypeMulti(Frame):
         TypeMulti.back.grid(row = 3, column=0, sticky=N+W+S)
 
     def Right(self):
-        print("Right")
         self.Leave("Right")
-        PlayersFrame.addPoints(-300)
+        PlayersFrame.addPoints(300)
         
     
     def Wrong(self):
         #print("Wrong")
         PlayersFrame.Switch()
+        #TODO better way to show that you are wrong.
         TypeMulti.Que.config(state=NORMAL)
         TypeMulti.Que.delete("1.0",END)
         TypeMulti.Que.insert(END, TypeMulti.the_que + "\nWrong")
@@ -339,6 +338,6 @@ window.geometry("{}x{}".format(WIDTH, HEIGHT))
 GBoard = JepdyBoard(window)
 Players = [Player("Player 1"), Player("Player 2")]
 PlayersFrame = PlayerFrame(window)
-PlayersFrame.Setup()
+#PlayersFrame.Setup()
 GBoard.Setup()
 window.mainloop()
