@@ -56,8 +56,6 @@ class ValsandAns():
 class Player:
     def __init__(self, name):
         self.name = name
-        #self.points = 0
-        #self.active = 0
 
     @property
     def points(self):
@@ -84,12 +82,16 @@ class PlayerFrame(Frame):
 
     def updatePlayerLabels(self, player):
         if (player.name == Players[0].name):
-            PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}")
+            PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Gold", "Black"][self.activePlayer])
         else:
-            PlayerFrame.Player2Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}")
+            PlayerFrame.Player2Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Black", "Gold"][self.activePlayer])
 
     def addPoints(self, pts):
         Players[self.activePlayer].points += pts
+    
+    def Switch(self):
+        #swap active players
+        pass
 
     def Setup(self):
         PlayerFrame.Player1Label = Label(self, font=Letters)
@@ -214,6 +216,7 @@ class TypeMulti(Frame):
     
     def Wrong(self):
         #print("Wrong")
+        PlayersFrame.Switch()
         TypeMulti.Que.config(state=NORMAL)
         TypeMulti.Que.delete("1.0",END)
         TypeMulti.Que.insert(END, TypeMulti.the_que + "\nWrong")
