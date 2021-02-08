@@ -1,3 +1,9 @@
+#####################################################################################
+# Team Name: Team Java
+# Group Members: Austen Belmonte, Josue Gaona, Victoria Grillo
+# Description: Pi-Project. Study game that uses variations of different style games.
+#####################################################################################
+
 from tkinter import *
 #import Rpi.GPIO as GPIO
 from random import randint
@@ -18,9 +24,9 @@ GPIO.setup(button2, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 #This could possibly useless and be moved into the JepdyBoard class
 class ValsandAns():
-    questions = [["a1","b1","c1","d1","e1"],
-                ["a2","b2","c2","d2","e2"], 
-                ["a3","b3","c3","d3","e3"]]
+    questions = [["How is Abstraction defined as?","Multiple inheritance is _______?","A Queue is a _____.","A Dictionary can be defined as?","Zero in a state means it is what?"],
+                ["True or False: A pyhton list size is not fixed.","True or False: A Stack is a FIFO Structure.","What does R in Flip Flop stand for?","_ _ _ _ _ _ _-This word means it selects a register.","_ _ _ _ _ _ _ (space) _ _ _ _ _ _ _-Is the name of an equation in computer science."], 
+                ["What does S in Flip Flop stand for?","An abbreviation for multiplexer is?","What letter holds the state in a flip flop until signed changes it?","A Flip Flop is used to store what two numbers? ","What is 5 in binary?"]]
     def __init__(self, points):
         self.points = points
 
@@ -53,7 +59,7 @@ class ValsandAns():
             return 2
 
 class TypeQuestion(Frame):
-    right_ans=["r","t","y","u","z"]
+    right_ans=["True","False","reset","decoder","boolean algebra"]
     def __init__(self, parent, question, location):
         Frame.__init__(self, parent)
 
@@ -112,8 +118,8 @@ class TypeQuestion(Frame):
             JepdyBoard.Que.config(state=DISABLED)
 
 class TypeMulti(Frame):
-    right_ans=["V","W","X","Y","Z"]
-    wrong_ans=[["A","B","C"],["D","E","F"],["G","H","I"],["J","K","L"],["M","N","O"]]
+    right_ans=["Ability to ignore details of parts of a system","Class inherits two or more superclasses","FIFO","Associative arrays","Low","Set","MUX", "Q", "0 or 1", "0101"]
+    wrong_ans=[["Increase the system by expanding the data","Ability to focus on one part of a system","Idea of multiple methods in a class"],["Class inherits only one superclass","self contained component at a program","To links b/w separate units of a program"],["LIFO","LILO","FILO"],["Disassociative arrays","Maps values to keys","Where keys can be changed"],["High","0","1"],["Stop","Start","Step"],["MLT","M","MTX"],["S","R","F"],["1 or 2","3 or 4","2 or 4"]]
     def __init__(self, parent, question, location):
         Frame.__init__(self, parent)
 
