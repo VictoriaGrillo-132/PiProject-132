@@ -207,7 +207,6 @@ class TypeMulti(Frame):
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=20, pady=(20, 20))
                 else:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=20, pady=20)
-
         self.pack(expand=1, fill=BOTH)
 
         #Back Button
@@ -245,47 +244,78 @@ class TypeMulti(Frame):
 #Just here for when we come up with 3rd game
 class TypeGuess(Frame):
     right_ans=["ras","tes","yrs","uts","zvd"]
+    qwert = [["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l"],["z","x","c","v","b","n","m"]]
     def __init__(self, parent, question, location):
         Frame.__init__(self, parent)
-        TypeQuestion.the__answer=location[1]
+        TypeGuess.the__answer=TypeGuess.right_ans[location[1]]
+        qwerty=TypeGuess.qwert
 
         #Question Box
-        TypeGuess.Que = Text(self, bg="light grey", height=2, font=Letters)
+        TypeGuess.Que = Text(self, bg="light grey", height=8, font=Letters)
         TypeGuess.Que.insert("1.0", question)
-        TypeGuess.Que.pack(anchor=N, fill=X)
+        TypeGuess.Que.grid(row=0, column=3, columnspan=4, sticky=N)
         TypeGuess.Que.config(state=DISABLED)
+
+        #Buttons for Letters
+        for row_ind in range(1, len(qwerty)+1):
+            Grid.rowconfigure(self, row_ind, weight=1)
+            #individual keys
+            for keys in range(len(qwerty[row_ind-1])):
+                Grid.columnconfigure(self, keys, weight=1)
+                key = Button(self, height=30, width=30, command=lambda letter=qwerty[row_ind-1][keys]: TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
+
+                if row_ind == 1:
+                    key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=(20, 20))
+                elif row_ind == 3:
+                    key.grid(row=row_ind, column=keys+1, sticky=N+S+E+W, pady=20)
+                else:
+                    key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=20)
+
+        self.pack(expand=1, fill=BOTH)
 
         #Entry for Answering
         TypeGuess.Ans = Entry(self, font=Letters)
-        TypeGuess.Ans.bind("<Return>", self.process)
-        TypeGuess.Ans.pack(anchor=S, fill=X, side=BOTTOM)
+        TypeGuess.Ans.grid(row=4, column=1, columnspan=8)
         TypeGuess.Ans.focus()
 
         #Back Button
-        TypeGuess.back = Button(self, text="Back", command=self.Leave)
-        TypeGuess.back.pack(anchor=SW, expand=1)
+        TypeGuess.back = Button(self, text="Back", command=lambda Exit="nothing": TypeGuess.Leave(self, Exit))
+        TypeGuess.back.grid(row = 4, column=0, sticky=N+W+S)
+        
+        # Creating main label
+        TypeGuess.display_used = StringVar()
+        TypeGuess.display = Label(self, textvariable=TypeGuess.display_used, font=Letters)
+        TypeGuess.display.grid(row=0, column=0, sticky=N+W+S+E, columnspan=2)
+        TypeGuess.display_used.set("Used Letters:\n")
 
     def process(self, event):
-        pass
-        response = TypeGuess.Ans.get()
-        response = response.lower()
+        Used = TypeGuess.display_used.get()
+        Used += event
+        TypeGuess.display_used.set(Used)
 
-        if response == TypeGuess.right_ans[TypeQuestion.the__answer]:
-            self.Right()
+        #
+
+        TypeGuess.Que.config(state=NORMAL)
+        TypeGuess.Que.insert("1.0", "question")
+        TypeGuess.Que.config(state=DISABLED)
+
+
+
+    def Guessed(self):
+        self.Leave("Guessed")
+
+    def Leave(self, Exit):
+        if Exit == "nothing":
+            self.pack_forget()
+            GBoard.pack(expand=1, fill=BOTH)
+            JepdyBoard.Que.delete("1.0",END)
         else:
-            self.Wrong()
-
-        TypeQuestion.Ans.delete(0, END)       
-
-    def Right(self):
-        print("Right")
-
-    def Wrong(self):
-        print("Wrong")
-
-    def Leave(self):
-        self.pack_forget()
-        GBoard.pack(expand=1, fill=BOTH)
+            self.pack_forget()
+            GBoard.pack(expand=1, fill=BOTH)
+            JepdyBoard.Que.config(state=NORMAL)
+            JepdyBoard.Que.delete("1.0",END)
+            JepdyBoard.Que.insert(END, "Right")
+            JepdyBoard.Que.config(state=DISABLED)
 
 class JepdyBoard(Frame):
     #cp=ValsandAns.ChoosePerson()
@@ -329,7 +359,7 @@ class JepdyBoard(Frame):
             MFrame.pack(expand=1, fill=BOTH)
 
         elif location[0] == 2:
-            GFrame = TypeMulti(window, ValsandAns.questions[location[0]][location[1]], location)
+            GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
             GFrame.pack(expand=1, fill=BOTH)
 
             
@@ -339,7 +369,7 @@ class JepdyBoard(Frame):
 window = Tk()
 window.title("Ready Set Study!")
 WIDTH = 800
-HEIGHT = 400
+HEIGHT = 500
 window.geometry("{}x{}".format(WIDTH, HEIGHT))
 #Make players frame and get their name somehow
 GBoard = JepdyBoard(window)
