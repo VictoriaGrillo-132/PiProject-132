@@ -124,6 +124,7 @@ class TypeQuestion(Frame):
 
         TypeQuestion.the_que=question
         TypeQuestion.the__answer=location[1]
+        self.location = location
 
         #Question Box
         TypeQuestion.Que = Text(self, bg="light grey", height=3, font=Letters)
@@ -154,6 +155,8 @@ class TypeQuestion(Frame):
 
     def Right(self):
         PlayersFrame.addPoints(600)
+        print(self.location)
+        GBoard.DisableBtn(self.location)
         self.Leave("Right")
 
     def Wrong(self):
@@ -178,6 +181,8 @@ class TypeMulti(Frame):
         Frame.__init__(self, parent)
 
         TypeMulti.the_que=question
+        #location of Jeporady button that we came from
+        self.location = location
 
         #Question Box
         TypeMulti.Que = Text(self, bg="light grey", width=70, height=3, font=Letters)
@@ -211,8 +216,10 @@ class TypeMulti(Frame):
         TypeMulti.back.grid(row = 3, column=0, sticky=N+W+S)
 
     def Right(self):
-        self.Leave("Right")
         PlayersFrame.addPoints(300)
+        # disable the button we came from
+        GBoard.DisableBtn(self.location)
+        self.Leave("Right")
         
     
     def Wrong(self):
@@ -305,6 +312,7 @@ class JepdyBoard(Frame):
     #cp=ValsandAns.ChoosePerson()
     def __init__(self, parent):
         Frame.__init__(self, parent)
+        self.btns = []
 
     def Setup(self):
         #Create jeoparady board buttons
@@ -314,6 +322,7 @@ class JepdyBoard(Frame):
             for col_index in range(5):
                 Grid.columnconfigure(self, col_index, weight=1)
                 btn = Button(self, command=lambda location=((row_index-2),col_index): JepdyBoard.BtnClick(self, location), text=f"${300*(row_index-1)}")
+                self.btns.append(btn)
                 if row_index == 2:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=(20, 10))
                 else:
@@ -329,9 +338,12 @@ class JepdyBoard(Frame):
         #JepdyBoard.Player2Label.grid(row=0, column=4, sticky=NSEW)
         #JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=NSEW)
 
+    def DisableBtn(self, location):
+        self.btns[(location[0] * 5) + location[1]].configure(state="disabled")
+
     def BtnClick(self, location):
         #location is (row,column)
-        print(f"{location[0]}x{location[1]}")
+        #print(location)
         #Remove the jeoparady board
         self.pack_forget()
         if location[0] == 1:
