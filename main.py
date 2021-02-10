@@ -4,7 +4,7 @@
 # Description: Pi-Project. Study game that uses variations of different style games.
 #####################################################################################
 
-from tkinter import *
+from tkinter import * 
 #import Rpi.GPIO as GPIO
 from random import randint
 import tkinter
@@ -85,10 +85,12 @@ class Player:
 class PlayerFrame(Frame): 
     def __init__(self, parent):
         Frame.__init__(self, parent)
-        PlayerFrame.Player1Label = Label(self, font=Letters)
-        PlayerFrame.Player2Label = Label(self, font=Letters)
-        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10)
-        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10)
+        PlayerFrame.Player1Label = Label(self, font=("Times New Roman", 20))
+        PlayerFrame.Player2Label = Label(self, font=("Times New Roman", 20))
+        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10, pady=10)
+        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10, pady=10)
+        PlayerFrame.infoLabel = Label(self, text="Hello", font=("Times New Roman", 32))
+        PlayerFrame.infoLabel.grid(row=0, column=4, sticky=NSEW, pady=10)
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(4, weight=1)
         self.pack(anchor=N, expand=1, fill=X)
@@ -115,6 +117,7 @@ class PlayerFrame(Frame):
         self.activePlayer = abs(self.activePlayer-1)
 
 class TypeQuestion(Frame):
+    #nothing is right
     right_ans=["True","False","reset","decoder","boolean algebra"]
     def __init__(self, parent, question, location):
         Frame.__init__(self, parent)
@@ -150,28 +153,23 @@ class TypeQuestion(Frame):
         TypeQuestion.Ans.delete(0, END)       
 
     def Right(self):
-        print("Right")
+        PlayersFrame.addPoints(600)
         self.Leave("Right")
 
     def Wrong(self):
-        print("Wrong")
-        TypeQuestion.Que.config(state=NORMAL)
-        TypeQuestion.Que.delete("1.0",END)
-        TypeQuestion.Que.insert(END, TypeQuestion.the_que + "\nWrong")
-        TypeQuestion.Que.config(state=DISABLED)
+        PlayersFrame.addPoints(-600)
+        PlayersFrame.Switch()
+        PlayerFrame.infoLabel.configure(text="Wrong!", foreground="red")
 
     def Leave(self, Exit):
         if Exit == "nothing":
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.delete("1.0",END)
+            PlayerFrame.infoLabel.configure(text="")
         else:
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.config(state=NORMAL)
-            JepdyBoard.Que.delete("1.0",END)
-            JepdyBoard.Que.insert(END, "Right")
-            JepdyBoard.Que.config(state=DISABLED)
+            PlayerFrame.infoLabel.configure(text="Correct!", foreground="green")
 
 class TypeMulti(Frame):
     right_ans=["Ability to ignore details of parts of a system","Class inherits two or more superclasses","FIFO","Associative arrays","Low","Set","MUX", "Q", "0 or 1", "0101"]
@@ -197,9 +195,9 @@ class TypeMulti(Frame):
             for col_index in range(1,3):
                 Grid.columnconfigure(self, col_index, weight=1)
                 if row_index == the_ans_row and col_index == the_ans_col:
-                    btn = Button(self, width=20, command=lambda Right=1: TypeMulti.Right(self), text=f"{TypeMulti.right_ans[location[1]]}")
+                    btn = Button(self, width=20, command=lambda Right=1: TypeMulti.Right(self), text=f"{TypeMulti.right_ans[location[1]]}", font=Letters)
                 else:
-                    btn = Button(self, width=20, command=lambda Wrong=1: TypeMulti.Wrong(self), text=f"{TypeMulti.wrong_ans[location[1]][wrongs]}")
+                    btn = Button(self, width=20, command=lambda Wrong=1: TypeMulti.Wrong(self), text=f"{TypeMulti.wrong_ans[location[1]][wrongs]}", font=Letters)
                     wrongs -= 1
 
                 if row_index == 1:
@@ -218,27 +216,20 @@ class TypeMulti(Frame):
         
     
     def Wrong(self):
-        #print("Wrong")
+        PlayersFrame.addPoints(-300)
         PlayersFrame.Switch()
         #TODO better way to show that you are wrong.
-        TypeMulti.Que.config(state=NORMAL)
-        TypeMulti.Que.delete("1.0",END)
-        TypeMulti.Que.insert(END, TypeMulti.the_que + "\nWrong")
-        TypeMulti.Que.config(state=DISABLED)
+        PlayerFrame.infoLabel.configure(text="Wrong!", foreground="red")
 
 
     def Leave(self, Exit):
         if Exit == "nothing":
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.delete("1.0",END)
         else:
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.config(state=NORMAL)
-            JepdyBoard.Que.delete("1.0",END)
-            JepdyBoard.Que.insert(END, "Right")
-            JepdyBoard.Que.config(state=DISABLED)
+            PlayerFrame.infoLabel.configure(text="Correct!", foreground="green")
 
 #Just here for when we come up with 3rd game
 class TypeGuess(Frame):
@@ -292,8 +283,6 @@ class TypeGuess(Frame):
         Used += event
         TypeGuess.display_used.set(Used)
 
-        #
-
         TypeGuess.Que.config(state=NORMAL)
         TypeGuess.Que.insert("1.0", "question")
         TypeGuess.Que.config(state=DISABLED)
@@ -307,14 +296,10 @@ class TypeGuess(Frame):
         if Exit == "nothing":
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.delete("1.0",END)
         else:
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            JepdyBoard.Que.config(state=NORMAL)
-            JepdyBoard.Que.delete("1.0",END)
-            JepdyBoard.Que.insert(END, "Right")
-            JepdyBoard.Que.config(state=DISABLED)
+            PlayerFrame.infoLabel.configure(text="Correct!", foreground="green")
 
 class JepdyBoard(Frame):
     #cp=ValsandAns.ChoosePerson()
@@ -338,11 +323,11 @@ class JepdyBoard(Frame):
         #Labels to show score, question, and maybe who's turn it is.
         #JepdyBoard.Player1Label = Label(self, text=f"{Players[0].name}\n${Players[0].points}", font=Letters)
         #JepdyBoard.Player2Label = Label(self, text=f"{Players[1].name}\n${Players[1].points}", font=Letters)
-        JepdyBoard.Que = Text(self, bg="light grey", width=1, height=5 , state=DISABLED, font=Letters)
+        #JepdyBoard.Que = Text(self, bg="light grey", width=1, height=5 , state=DISABLED, font=Letters)
 
         #JepdyBoard.Player1Label.grid(row=0, column=0, sticky=NSEW)
         #JepdyBoard.Player2Label.grid(row=0, column=4, sticky=NSEW)
-        JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=NSEW)
+        #JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=NSEW)
 
     def BtnClick(self, location):
         #location is (row,column)
