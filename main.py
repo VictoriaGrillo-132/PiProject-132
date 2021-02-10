@@ -106,8 +106,8 @@ class PlayerFrame(Frame):
         self.updatePlayerLabels(Players[value])
 
     def updatePlayerLabels(self, player):        
-        PlayerFrame.Player1Label.configure(text=f"{Players[0].name}\n$ {Players[0].points}", foreground=["Gold2", "Black"][self.activePlayer])
-        PlayerFrame.Player2Label.configure(text=f"{Players[1].name}\n$ {Players[1].points}", foreground=["Black", "Gold2"][self.activePlayer])
+        PlayerFrame.Player1Label.configure(text="{}\n$ {}".format(Players[0].name, Players[0].points), foreground=["Gold2", "Black"][self.activePlayer])
+        PlayerFrame.Player2Label.configure(text="{}\n$ {}".format(Players[1].name, Players[1].points), foreground=["Black", "Gold2"][self.activePlayer])
 
     def addPoints(self, pts):
         Players[self.activePlayer].points += pts
@@ -200,9 +200,9 @@ class TypeMulti(Frame):
             for col_index in range(1,3):
                 Grid.columnconfigure(self, col_index, weight=1)
                 if row_index == the_ans_row and col_index == the_ans_col:
-                    btn = Button(self, width=20, command=lambda Right=1: TypeMulti.Right(self), text=f"{TypeMulti.right_ans[location[1]]}", font=Letters)
+                    btn = Button(self, width=20, command=lambda Right=1: TypeMulti.Right(self), text="{}".format(TypeMulti.right_ans[location[1]]), font=Letters)
                 else:
-                    btn = Button(self, width=20, command=lambda Wrong=1: TypeMulti.Wrong(self), text=f"{TypeMulti.wrong_ans[location[1]][wrongs]}", font=Letters)
+                    btn = Button(self, width=20, command=lambda Wrong=1: TypeMulti.Wrong(self), text="{}".format(TypeMulti.wrong_ans[location[1]][wrongs]), font=Letters)
                     wrongs -= 1
 
                 if row_index == 1:
@@ -259,7 +259,7 @@ class TypeGuess(Frame):
             #individual keys
             for keys in range(len(qwerty[row_ind-1])):
                 Grid.columnconfigure(self, keys, weight=1)
-                key = Button(self, height=30, width=30, command=lambda letter=qwerty[row_ind-1][keys]: TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
+                key = Button(self, height=30, width=30, command=lambda letter=qwerty[row_ind-1][keys]: TypeGuess.process(self, letter), text="{}".format(qwerty[row_ind-1][keys]))
 
                 if row_ind == 1:
                     key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=(20, 20))
@@ -321,22 +321,13 @@ class JepdyBoard(Frame):
             #number of columns
             for col_index in range(5):
                 Grid.columnconfigure(self, col_index, weight=1)
-                btn = Button(self, command=lambda location=((row_index-2),col_index): JepdyBoard.BtnClick(self, location), text=f"${300*(row_index-1)}")
+                btn = Button(self, command=lambda location=((row_index-2),col_index): JepdyBoard.BtnClick(self, location), text="${}".format(300*(row_index-1)))
                 self.btns.append(btn)
                 if row_index == 2:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=(20, 10))
                 else:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=10)
         self.pack(anchor=N, expand=1, fill=BOTH)
-
-        #Labels to show score, question, and maybe who's turn it is.
-        #JepdyBoard.Player1Label = Label(self, text=f"{Players[0].name}\n${Players[0].points}", font=Letters)
-        #JepdyBoard.Player2Label = Label(self, text=f"{Players[1].name}\n${Players[1].points}", font=Letters)
-        #JepdyBoard.Que = Text(self, bg="light grey", width=1, height=5 , state=DISABLED, font=Letters)
-
-        #JepdyBoard.Player1Label.grid(row=0, column=0, sticky=NSEW)
-        #JepdyBoard.Player2Label.grid(row=0, column=4, sticky=NSEW)
-        #JepdyBoard.Que.grid(row=0, column=1, rowspan=2, columnspan = 3, sticky=NSEW)
 
     def DisableBtn(self, location):
         self.btns[(location[0] * 5) + location[1]].configure(state="disabled")
