@@ -240,16 +240,21 @@ class TypeMulti(Frame):
 
 #Just here for when we come up with 3rd game
 class TypeGuess(Frame):
-    right_ans=["ras","tes","yrs","uts","zvd"]
+    chances = 3
+    right_ans=["rasr","tes","yrs","uts","zvd"]
     qwert = [["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l"],["z","x","c","v","b","n","m"]]
     def __init__(self, parent, question, location):
+        self.akeys = []
         Frame.__init__(self, parent)
-        TypeGuess.the__answer=TypeGuess.right_ans[location[1]]
+        self.location = location
+        TypeGuess.the_answer=TypeGuess.right_ans[location[1]]
         qwerty=TypeGuess.qwert
-
+        TypeGuess.question = question
+        
         #Question Box
+        TypeGuess.blanks = "_" * len(TypeGuess.the_answer)
         TypeGuess.Que = Text(self, bg="light grey", height=8, font=Letters)
-        TypeGuess.Que.insert("1.0", question)
+        TypeGuess.Que.insert("1.0", question + "\n" + TypeGuess.blanks)
         TypeGuess.Que.grid(row=0, column=3, columnspan=4, sticky=N)
         TypeGuess.Que.config(state=DISABLED)
 
@@ -259,8 +264,8 @@ class TypeGuess(Frame):
             #individual keys
             for keys in range(len(qwerty[row_ind-1])):
                 Grid.columnconfigure(self, keys, weight=1)
-                key = Button(self, height=30, width=30, command=lambda letter=qwerty[row_ind-1][keys]: TypeGuess.process(self, letter), text="{}".format(qwerty[row_ind-1][keys]))
-
+                key = Button(self, height=30, width=30, command=lambda letter=(row_ind-1,keys): TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
+                self.akeys.append(key)
                 if row_ind == 1:
                     key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=(20, 20))
                 elif row_ind == 3:
@@ -285,18 +290,58 @@ class TypeGuess(Frame):
         TypeGuess.display.grid(row=0, column=0, sticky=N+W+S+E, columnspan=2)
         TypeGuess.display_used.set("Used Letters:\n")
 
+        TypeGuess.display_strikes = StringVar()
+        TypeGuess.display_again = Label(self, textvariable=TypeGuess.display_strikes, font=Letters)
+        TypeGuess.display_again.grid(row=0, column=7, sticky=N+W+S+E, columnspan=2)
+        TypeGuess.display_strikes.set("Strikes:\n")
+
     def process(self, event):
+        TypeGuess.Que.config(state=NORMAL)
+        chara = TypeGuess.qwert[event[0]][event[1]]
         Used = TypeGuess.display_used.get()
-        Used += event
+        Used += chara
         TypeGuess.display_used.set(Used)
 
-        TypeGuess.Que.config(state=NORMAL)
-        TypeGuess.Que.insert("1.0", "question")
+        if chara in TypeGuess.the_answer:
+            blanklist = list(TypeGuess.blanks)
+            print(blanklist)
+            indexes = [i for i, letter in enumerate(TypeGuess.the_answer) if letter == chara]
+            print(indexes)
+            for _ in indexes:
+                blanklist[_] = (chara)
+
+            
+            TypeGuess.blanks = "".join(blanklist)
+            TypeGuess.Que.delete("1.0", END)
+            TypeGuess.Que.insert("1.0", TypeGuess.question + "\n" + TypeGuess.blanks)
+            if "_" not in TypeGuess.blanks:
+                 self.Guessed()
+        else:
+            Strikes = TypeGuess.display_strikes.get()
+            Strikes += "X"
+            TypeGuess.display_strikes.set(Strikes)
+            TypeGuess.chances -= 1
+
+            if TypeGuess.chances < 0:
+                #PlayersFrame.addPoints(-900)
+                PlayersFrame.Switch()
+                TypeGuess.display_strikes.set("Strikes:\n")
+                TypeGuess.chances = 3
+        
         TypeGuess.Que.config(state=DISABLED)
-
-
+        self.DisableKeys(event)
+        
+    def DisableKeys(self, event):
+        if event[0] == 2:
+            self.akeys[(event[0]*10) + (event[1]-1)].configure(state="disabled")    
+        else:
+            self.akeys[(event[0]*10) + event[1]].configure(state="disabled")
+            
+        
 
     def Guessed(self):
+        GBoard.DisableBtn(self.location)
+        PlayersFrame.addPoints(900)
         self.Leave("Guessed")
 
     def Leave(self, Exit):
