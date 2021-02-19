@@ -27,7 +27,7 @@ GPIO.setup(button2, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 class ValsandAns():
     questions = [["How is Abstraction defined as?","Multiple inheritance is _______?","A Queue is a _____.","A Dictionary can be defined as?","Zero in a state means it is what?"],
                 ["True or False: A pyhton list size is not fixed.","True or False: A Stack is a FIFO Structure.","What does R in Flip Flop stand for?","_ _ _ _ _ _ _-This word means it selects a register.","_ _ _ _ _ _ _ (space) _ _ _ _ _ _ _-Is the name of an equation in computer science."], 
-                ["What does S in Flip Flop stand for?","An abbreviation for multiplexer is?","What letter holds the state in a flip flop until signed changes it?","A Flip Flop is used to store what two numbers? ","What is 5 in binary?"]]
+                ["What does S in Flip Flop stand for?","An abbreviation for multiplexer is?","What letter holds the state in a flip flop until signed changes it?","A Flip Flop is used to store what two numbers? (seperate by comma: ex:2,4)","What is 5 in binary?"]]
     def __init__(self, points):
         self.points = points
 
@@ -241,7 +241,7 @@ class TypeMulti(Frame):
 #Just here for when we come up with 3rd game
 class TypeGuess(Frame):
     chances = 3
-    right_ans=["rasr","tes","yrs","uts","zvd"]
+    right_ans=["set","mux","q","0,1","0101"]
     qwert = [["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l"],["z","x","c","v","b","n","m"]]
     def __init__(self, parent, question, location):
         self.akeys = []
