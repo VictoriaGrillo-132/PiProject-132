@@ -9,6 +9,7 @@ from tkinter import *
 from random import randint
 import tkinter
 Letters=("Times New Roman", 14)
+FONT = "Times New Roman"
 
 '''
 #Setting up the leds and buttons
@@ -85,12 +86,22 @@ class Player:
 class PlayerFrame(Frame): 
     def __init__(self, parent):
         Frame.__init__(self, parent)
-        PlayerFrame.Player1Label = Label(self, font=("Times New Roman", 20))
-        PlayerFrame.Player2Label = Label(self, font=("Times New Roman", 20))
-        PlayerFrame.Player1Label.grid(row=0, column=0, sticky=NSEW, padx=10, pady=10)
-        PlayerFrame.Player2Label.grid(row=0, column=5, sticky=NSEW, padx=10, pady=10)
-        PlayerFrame.infoLabel = Label(self, text="Hello", font=("Times New Roman", 32))
-        PlayerFrame.infoLabel.grid(row=0, column=4, sticky=NSEW, pady=10)
+        PlayerFrame.Player1Name = Label(self, font=(FONT, 24))
+        PlayerFrame.Player1Name.bind("<Button-1>", self.NameChange)
+        PlayerFrame.Player2Name = Label(self, font=(FONT, 24))
+        PlayerFrame.Player2Name.bind("<Button-1>", self.NameChange)
+
+        PlayerFrame.Player1Points = Label(self, font=(FONT, 24))
+        PlayerFrame.Player2Points = Label(self, font=(FONT, 24))
+
+        PlayerFrame.Player1Name.grid(row=0, column=0, sticky=NSEW, padx=(15,0), pady=(10,0))
+        PlayerFrame.Player2Name.grid(row=0, column=5, sticky=NSEW, padx=(0,15), pady=(10,0))
+        PlayerFrame.Player1Points.grid(row=1, column=0, sticky=NSEW, padx=0, pady=0)
+        PlayerFrame.Player2Points.grid(row=1, column=5, sticky=NSEW, padx=0, pady=0)
+
+        PlayerFrame.infoLabel = Label(self, text="Click player name to change it!", font=(FONT, 28), wraplength=560)
+        PlayerFrame.infoLabel.grid(row=3, column=4, sticky=NSEW, pady=0)
+        PlayerFrame.infoLabel.after(2000, lambda: PlayerFrame.infoLabel.configure(text=""))
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(4, weight=1)
         self.pack(anchor=N, expand=1, fill=X)
@@ -106,8 +117,10 @@ class PlayerFrame(Frame):
         self.updatePlayerLabels(Players[value])
 
     def updatePlayerLabels(self, player):        
-        PlayerFrame.Player1Label.configure(text="{}\n$ {}".format(Players[0].name, Players[0].points), foreground=["Gold2", "Black"][self.activePlayer])
-        PlayerFrame.Player2Label.configure(text="{}\n$ {}".format(Players[1].name, Players[1].points), foreground=["Black", "Gold2"][self.activePlayer])
+        PlayerFrame.Player1Name.configure(text=Players[0].name, foreground=["Gold2", "Black"][self.activePlayer])
+        PlayerFrame.Player2Name.configure(text=Players[1].name, foreground=["Black", "Gold2"][self.activePlayer])
+        PlayerFrame.Player1Points.configure(text="$ {}".format(Players[0].points), foreground=["Gold2", "Black"][self.activePlayer])
+        PlayerFrame.Player2Points.configure(text="$ {}".format(Players[1].points), foreground=["Black", "Gold2"][self.activePlayer])
 
     def addPoints(self, pts):
         Players[self.activePlayer].points += pts
@@ -116,9 +129,12 @@ class PlayerFrame(Frame):
         #swap active players
         self.activePlayer = abs(self.activePlayer-1)
 
+    def NameChange(self, e):
+        print("It dosen't work")
+
 class TypeQuestion(Frame):
     #nothing is right
-    right_ans=["True","False","reset","decoder","boolean algebra"]
+    right_ans=["True","False","Reset","Decoder","Boolean Algebra"]
     def __init__(self, parent, question, location):
         Frame.__init__(self, parent)
 
@@ -139,18 +155,17 @@ class TypeQuestion(Frame):
         TypeQuestion.Ans.focus()
 
         #Back Button
-        TypeQuestion.back = Button(self, text="Back", command=lambda Exit="nothing": self.Leave(Exit))
+        TypeQuestion.back = Button(self, text="Give up", command=lambda Exit="give up": self.Leave(Exit))
         TypeQuestion.back.pack(anchor=SW, expand=1)
 
     def process(self, event):
         response = TypeQuestion.Ans.get()
         response = response.lower()
 
-        if response == TypeQuestion.right_ans[TypeQuestion.the__answer]:
+        if response == TypeQuestion.right_ans[TypeQuestion.the__answer].lower():
             self.Right()
         else:
             self.Wrong()
-
         TypeQuestion.Ans.delete(0, END)       
 
     def Right(self):
@@ -162,17 +177,18 @@ class TypeQuestion(Frame):
     def Wrong(self):
         PlayersFrame.addPoints(-600)
         PlayersFrame.Switch()
-        PlayerFrame.infoLabel.configure(text="Wrong!", foreground="red")
+        PlayerFrame.infoLabel.configure(text="Wrong!", foreground="red", font=(FONT, 38))
 
     def Leave(self, Exit):
-        if Exit == "nothing":
+        if Exit == "give up":
+            PlayerFrame.infoLabel.configure(text="Correct Answer: {}".format(TypeQuestion.right_ans[TypeQuestion.the__answer]), foreground="red", font=(FONT, 28))
+            GBoard.DisableBtn(self.location)
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            PlayerFrame.infoLabel.configure(text="")
         else:
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
-            PlayerFrame.infoLabel.configure(text="Correct!", foreground="green")
+            PlayerFrame.infoLabel.configure(text="Correct!", foreground="green", font=(FONT, 38))
 
 class TypeMulti(Frame):
     right_ans=["Ability to ignore details of parts of a system","Class inherits two or more superclasses","FIFO","Associative arrays","Low","Set","MUX", "Q", "0 or 1", "0101"]
@@ -206,13 +222,13 @@ class TypeMulti(Frame):
                     wrongs -= 1
 
                 if row_index == 1:
-                    btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=20, pady=(20, 20))
+                    btn.grid(row=row_index, column=col_index, sticky=NSEW, padx=20, pady=20)
                 else:
-                    btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=20, pady=20)
+                    btn.grid(row=row_index, column=col_index, sticky=NSEW, padx=20, pady=20)
         self.pack(expand=1, fill=BOTH)
 
         #Back Button
-        TypeMulti.back = Button(self, text="Back", command=lambda Exit="nothing": TypeMulti.Leave(self, Exit))
+        TypeMulti.back = Button(self, text="Give up", command=lambda Exit="give up": TypeMulti.Leave(self, Exit))
         TypeMulti.back.grid(row = 3, column=0, sticky=N+W+S)
 
     def Right(self):
@@ -230,7 +246,9 @@ class TypeMulti(Frame):
 
 
     def Leave(self, Exit):
-        if Exit == "nothing":
+        if Exit == "give up":
+            PlayerFrame.infoLabel.configure(text="Correct Answer: {}".format(TypeMulti.right_ans[self.location[1]]), foreground="red")
+            GBoard.DisableBtn(self.location)
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
         else:
@@ -253,7 +271,7 @@ class TypeGuess(Frame):
         
         #Question Box
         TypeGuess.blanks = "_" * len(TypeGuess.the_answer)
-        TypeGuess.Que = Text(self, bg="light grey", height=8, font=Letters)
+        TypeGuess.Que = Text(self, bg="light grey", height=8, font=Letters, wrap=WORD)
         TypeGuess.Que.insert("1.0", question + "\n" + TypeGuess.blanks)
         TypeGuess.Que.grid(row=0, column=3, columnspan=4, sticky=N)
         TypeGuess.Que.config(state=DISABLED)
@@ -264,14 +282,14 @@ class TypeGuess(Frame):
             #individual keys
             for keys in range(len(qwerty[row_ind-1])):
                 Grid.columnconfigure(self, keys, weight=1)
-                key = Button(self, height=30, width=30, command=lambda letter=(row_ind-1,keys): TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
+                key = Button(self, height=30, width=30, font=(FONT, 14), command=lambda letter=(row_ind-1,keys): TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
                 self.akeys.append(key)
                 if row_ind == 1:
-                    key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=(20, 20))
+                    key.grid(row=row_ind, column=keys, sticky=NSEW, pady=(20, 10))
                 elif row_ind == 3:
-                    key.grid(row=row_ind, column=keys+1, sticky=N+S+E+W, pady=20)
+                    key.grid(row=row_ind, column=keys+1, sticky=NSEW, pady=10)
                 else:
-                    key.grid(row=row_ind, column=keys, sticky=N+S+E+W, pady=20)
+                    key.grid(row=row_ind, column=keys, sticky=NSEW, pady=10)
 
         self.pack(expand=1, fill=BOTH)
 
@@ -366,7 +384,7 @@ class JepdyBoard(Frame):
             #number of columns
             for col_index in range(5):
                 Grid.columnconfigure(self, col_index, weight=1)
-                btn = Button(self, command=lambda location=((row_index-2),col_index): JepdyBoard.BtnClick(self, location), text="${}".format(300*(row_index-1)))
+                btn = Button(self, command=lambda location=((row_index-2),col_index): JepdyBoard.BtnClick(self, location), text="${}".format(300*(row_index-1)), font=Letters)
                 self.btns.append(btn)
                 if row_index == 2:
                     btn.grid(row=row_index, column=col_index, sticky=N+S+E+W, padx=10, pady=(20, 10))
@@ -394,9 +412,6 @@ class JepdyBoard(Frame):
             GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
             GFrame.pack(expand=1, fill=BOTH)
 
-            
-        #print question in top texbox
-        #ValsandAns.Questions(self, location)
 
 window = Tk()
 window.title("Ready Set Study!")
@@ -407,6 +422,5 @@ window.geometry("{}x{}".format(WIDTH, HEIGHT))
 GBoard = JepdyBoard(window)
 Players = [Player("Player 1"), Player("Player 2")]
 PlayersFrame = PlayerFrame(window)
-#PlayersFrame.Setup()
 GBoard.Setup()
 window.mainloop()
