@@ -98,9 +98,10 @@ class PlayerFrame(Frame):
         PlayerFrame.Player1Points.grid(row=1, column=0, sticky=NSEW, padx=0, pady=0)
         PlayerFrame.Player2Points.grid(row=1, column=5, sticky=NSEW, padx=0, pady=0)
 
-        PlayerFrame.infoLabel = Label(self, text="Click player name to change it!", font=(FONT, 28), wraplength=560)
+        PlayerFrame.infoLabel = Label(self, text="Ready!", font=(FONT, 28), wraplength=560)
         PlayerFrame.infoLabel.grid(row=3, column=4, sticky=NSEW, pady=0)
-        PlayerFrame.infoLabel.after(2000, lambda: PlayerFrame.infoLabel.configure(text=""))
+        PlayerFrame.infoLabel.after(800, lambda: PlayerFrame.infoLabel.configure(text="Ready! Set!"))
+        PlayerFrame.infoLabel.after(1600, lambda: PlayerFrame.infoLabel.configure(text="Ready! Set! Study!"))
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(4, weight=1)
         self.pack(anchor=N, expand=1, fill=X)
@@ -259,7 +260,7 @@ class TypeMulti(Frame):
 class TypeGuess(Frame):
     chances = 3
     right_ans=["set","mux","q","0,1","0101"]
-    qwert = [["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l"],["z","x","c","v","b","n","m"]]
+    qwert = [["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l",","],["z","x","c","v","b","n","m","0","1"]]
     def __init__(self, parent, question, location):
         self.akeys = []
         Frame.__init__(self, parent)
@@ -270,7 +271,7 @@ class TypeGuess(Frame):
         
         #Question Box
         TypeGuess.blanks = "_" * len(TypeGuess.the_answer)
-        TypeGuess.Que = Text(self, bg="light grey", height=8, font=Letters, wrap=WORD)
+        TypeGuess.Que = Text(self, bg="light grey", height=4, font=Letters, wrap=WORD)
         TypeGuess.Que.insert("1.0", question + "\n" + TypeGuess.blanks)
         TypeGuess.Que.grid(row=0, column=3, columnspan=4, sticky=N)
         TypeGuess.Que.config(state=DISABLED)
@@ -290,13 +291,8 @@ class TypeGuess(Frame):
                 else:
                     key.grid(row=row_ind, column=keys, sticky=NSEW, pady=10)
 
-        #Entry for Answering
-        TypeGuess.Ans = Entry(self, font=Letters)
-        TypeGuess.Ans.grid(row=4, column=1, columnspan=8)
-        TypeGuess.Ans.focus()
-
         #Back Button
-        TypeGuess.back = Button(self, text="Back", command=lambda Exit="nothing": TypeGuess.Leave(self, Exit))
+        TypeGuess.back = Button(self, text="Give Up", command=lambda Exit="give up": TypeGuess.Leave(self, Exit))
         TypeGuess.back.grid(row = 4, column=0, sticky=N+W+S)
         
         # Creating main label
@@ -360,7 +356,9 @@ class TypeGuess(Frame):
         self.Leave("Guessed")
 
     def Leave(self, Exit):
-        if Exit == "nothing":
+        if Exit == "give up":
+            PlayerFrame.infoLabel.configure(text="Correct Answer: {}".format(TypeGuess.right_ans[self.location[1]]), foreground="red")
+            GBoard.DisableBtn(self.location)
             self.pack_forget()
             GBoard.pack(expand=1, fill=BOTH)
         else:
@@ -410,18 +408,17 @@ class JepdyBoard(Frame):
         elif location[0] == 2:
             GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
             GFrame.pack(expand=1, fill=BOTH)
+            GFrame.after(300, GBoard.waitplayer)
 
     def flashLED(self):
         player = PlayersFrame.activePlayer
         if (player == 0):
             GPIO.output(led1, GPIO.HIGH)
-            sleep(0.5)
-            GPIO.output(led1, GPIO.LOW)
+            GPIO.output(led2, GPIO.LOW)
         elif (player == 1):
             GPIO.output(led2, GPIO.HIGH)
-            sleep(0.5)
-            GPIO.output(led2, GPIO.LOW)
-        self.after(500, self.flashLED)
+            GPIO.output(led1, GPIO.LOW)
+        self.after(50, self.flashLED)
 
     def waitplayer(self):
         #where the player waits till someone "buzzes" in to answer
