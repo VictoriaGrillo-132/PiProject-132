@@ -409,23 +409,31 @@ class JepdyBoard(Frame):
 
         elif location[0] == 2:
             GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
-            GFrame.pack(expand=1, fill=BOTH)         
+            GFrame.pack(expand=1, fill=BOTH)
+
+    def flashLED(self):
+        player = PlayersFrame.activePlayer
+        if (player == 0):
+            GPIO.output(led1, GPIO.HIGH)
+            sleep(0.5)
+            GPIO.output(led1, GPIO.LOW)
+        elif (player == 1):
+            GPIO.output(led2, GPIO.HIGH)
+            sleep(0.5)
+            GPIO.output(led2, GPIO.LOW)
+        self.after(500, self.flashLED)
 
     def waitplayer(self):
         #where the player waits till someone "buzzes" in to answer
         while(True):
             if GPIO.input(button1) == GPIO.HIGH:
-                GPIO.output(led1, GPIO.HIGH)
                 PlayersFrame.activePlayer = 0
-                sleep(.5)
-                GPIO.output(led1, GPIO.LOW)
+                self.after(10, self.flashLED)
                 return
                 
             elif GPIO.input(button2) == GPIO.HIGH:
-                GPIO.output(led2, GPIO.HIGH)
                 PlayersFrame.activePlayer = 1
-                sleep(.5)
-                GPIO.output(led2, GPIO.LOW)
+                self.after(10, self.flashLED)
                 return
                 
 window = Tk()
