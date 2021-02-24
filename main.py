@@ -5,24 +5,23 @@
 #####################################################################################
 
 from tkinter import * 
-#import Rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from random import randint
-import tkinter
+from time import sleep
 Letters=("Times New Roman", 14)
 FONT = "Times New Roman"
 
-'''
 #Setting up the leds and buttons
 GPIO.setmode(GPIO.BCM)
-led1 = None
-led2 = None
-button1 = None
-button2 = None
+led1 = 18 #red LED
+led2 = 17 #blue LED
+button1 = 26 #with red LED
+button2 = 13 #with blue LED
 GPIO.setup(led1, GPIO.OUT)
 GPIO.setup(led2, GPIO.OUT)
 GPIO.setup(button1, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 GPIO.setup(button2, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-'''
+
 
 #This could possibly useless and be moved into the JepdyBoard class
 class ValsandAns():
@@ -225,11 +224,11 @@ class TypeMulti(Frame):
                     btn.grid(row=row_index, column=col_index, sticky=NSEW, padx=20, pady=20)
                 else:
                     btn.grid(row=row_index, column=col_index, sticky=NSEW, padx=20, pady=20)
-        self.pack(expand=1, fill=BOTH)
 
         #Back Button
         TypeMulti.back = Button(self, text="Give up", command=lambda Exit="give up": TypeMulti.Leave(self, Exit))
         TypeMulti.back.grid(row = 3, column=0, sticky=N+W+S)
+        self.pack(expand=1, fill=BOTH)
 
     def Right(self):
         PlayersFrame.addPoints(300)
@@ -282,7 +281,7 @@ class TypeGuess(Frame):
             #individual keys
             for keys in range(len(qwerty[row_ind-1])):
                 Grid.columnconfigure(self, keys, weight=1)
-                key = Button(self, height=30, width=30, font=(FONT, 14), command=lambda letter=(row_ind-1,keys): TypeGuess.process(self, letter), text=f"{qwerty[row_ind-1][keys]}")
+                key = Button(self, height=30, width=30, font=(FONT, 14), command=lambda letter=(row_ind-1,keys): TypeGuess.process(self, letter), text="{}".format(qwerty[row_ind-1][keys]))
                 self.akeys.append(key)
                 if row_ind == 1:
                     key.grid(row=row_ind, column=keys, sticky=NSEW, pady=(20, 10))
@@ -290,8 +289,6 @@ class TypeGuess(Frame):
                     key.grid(row=row_ind, column=keys+1, sticky=NSEW, pady=10)
                 else:
                     key.grid(row=row_ind, column=keys, sticky=NSEW, pady=10)
-
-        self.pack(expand=1, fill=BOTH)
 
         #Entry for Answering
         TypeGuess.Ans = Entry(self, font=Letters)
@@ -403,20 +400,38 @@ class JepdyBoard(Frame):
         if location[0] == 1:
             QFrame = TypeQuestion(window, ValsandAns.questions[location[0]][location[1]], location)
             QFrame.pack(expand=1, fill=BOTH)
+            QFrame.after(300, GBoard.waitplayer)
         
         elif location[0] == 0:
             MFrame = TypeMulti(window, ValsandAns.questions[location[0]][location[1]], location)
-            MFrame.pack(expand=1, fill=BOTH)
+            #MFrame.pack(expand=1, fill=BOTH)
+            MFrame.after(300, GBoard.waitplayer)
 
         elif location[0] == 2:
             GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
-            GFrame.pack(expand=1, fill=BOTH)
+            GFrame.pack(expand=1, fill=BOTH)         
 
-
+    def waitplayer(self):
+        #where the player waits till someone "buzzes" in to answer
+        while(True):
+            if GPIO.input(button1) == GPIO.HIGH:
+                GPIO.output(led1, GPIO.HIGH)
+                PlayersFrame.activePlayer = 0
+                sleep(.5)
+                GPIO.output(led1, GPIO.LOW)
+                return
+                
+            elif GPIO.input(button2) == GPIO.HIGH:
+                GPIO.output(led2, GPIO.HIGH)
+                PlayersFrame.activePlayer = 1
+                sleep(.5)
+                GPIO.output(led2, GPIO.LOW)
+                return
+                
 window = Tk()
 window.title("Ready Set Study!")
 WIDTH = 800
-HEIGHT = 500
+HEIGHT = 420
 window.geometry("{}x{}".format(WIDTH, HEIGHT))
 #Make players frame and get their name somehow
 GBoard = JepdyBoard(window)
@@ -424,3 +439,4 @@ Players = [Player("Player 1"), Player("Player 2")]
 PlayersFrame = PlayerFrame(window)
 GBoard.Setup()
 window.mainloop()
+GPIO.cleanup()
