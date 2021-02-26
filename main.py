@@ -397,16 +397,19 @@ class JepdyBoard(Frame):
         self.pack_forget()
         if location[0] == 1:
             QFrame = TypeQuestion(window, ValsandAns.questions[location[0]][location[1]], location)
+            PlayerFrame.infoLabel.configure(text="")
             QFrame.pack(expand=1, fill=BOTH)
             QFrame.after(300, GBoard.waitplayer)
         
         elif location[0] == 0:
             MFrame = TypeMulti(window, ValsandAns.questions[location[0]][location[1]], location)
+            PlayerFrame.infoLabel.configure(text="")
             #MFrame.pack(expand=1, fill=BOTH)
             MFrame.after(300, GBoard.waitplayer)
 
         elif location[0] == 2:
             GFrame = TypeGuess(window, ValsandAns.questions[location[0]][location[1]], location)
+            PlayerFrame.infoLabel.configure(text="")
             GFrame.pack(expand=1, fill=BOTH)
             GFrame.after(300, GBoard.waitplayer)
 
